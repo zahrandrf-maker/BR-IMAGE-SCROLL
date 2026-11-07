@@ -1,4 +1,4 @@
-# BR Running Logo — V0.1.0 Beta
+# BR Running Logo — V0.1.1 Beta
 
 Source FFGL transparan untuk menjalankan beberapa logo seperti running text di
 Resolume Arena/Avenue Windows. Original effect by **BELAJAR RESOLUME**.
@@ -26,7 +26,7 @@ Resolume Arena/Avenue Windows. Original effect by **BELAJAR RESOLUME**.
 2. Upload **semua isi folder ini**, termasuk folder `.github`.
 3. Buka tab **Actions** lalu pilih **Build BR Running Logo**.
 4. Klik **Run workflow**.
-5. Setelah selesai, unduh artifact `BR-Running-Logo-Windows-v0.1.0-beta`.
+5. Setelah selesai, unduh artifact `BR-Running-Logo-Windows-v0.1.1-beta`.
 
 GitHub Actions akan menghasilkan satu file plugin Windows x64 tanpa perlu
 Visual Studio pada komputer Anda.
@@ -80,3 +80,11 @@ salin logo dan pilih ulang file melalui `Manage Logos`.
 ## Credit
 
 **Effect by Belajar Resolume**
+
+## Changelog
+
+### V0.1.1 Beta
+
+- Memperbaiki konflik nama fungsi `clamp01` dengan FFGL SDK yang menyebabkan
+  Build Release gagal.
+- Membersihkan warning konversi ID kontrol Windows ke `HMENU` pada Logo Manager.

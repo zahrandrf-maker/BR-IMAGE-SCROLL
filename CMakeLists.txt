@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(BRRunningLogo VERSION 0.1.0 LANGUAGES CXX)
+project(BRRunningLogo VERSION 0.1.1 LANGUAGES CXX)
 
 if(NOT WIN32)
   message(FATAL_ERROR "BR Running Logo currently supports Windows only")

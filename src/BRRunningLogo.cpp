@@ -49,11 +49,11 @@ enum Param : FFUInt32 {
 
 static CFFGLPluginInfo PluginInfo(
   PluginFactory<BRRunningLogo>, "BRLG", "BR Running Logo",
-  2, 1, 0, 100, FF_SOURCE,
+  2, 1, 0, 101, FF_SOURCE,
   "Multi-logo ticker source by BELAJAR RESOLUME",
   "Effect by Belajar Resolume");
 
-float clamp01(float value){return std::max(0.0f,std::min(1.0f,value));}
+float brClamp01(float value){return std::max(0.0f,std::min(1.0f,value));}
 
 std::wstring utf8ToWide(const std::string& value){
   if(value.empty())return L"";
@@ -265,11 +265,11 @@ LRESULT CALLBACK BRRunningLogo::ManagerWndProc(HWND window,UINT message,WPARAM w
     case WM_CREATE:{
       CreateWindowExW(0,L"STATIC",L"Add multiple PNG/JPG/BMP logos. The list order is the running order.",WS_CHILD|WS_VISIBLE,16,14,760,22,window,nullptr,nullptr,nullptr);
       self->managerList_=CreateWindowExW(WS_EX_CLIENTEDGE,L"LISTBOX",L"",WS_CHILD|WS_VISIBLE|WS_TABSTOP|WS_VSCROLL|LBS_NOTIFY|LBS_NOINTEGRALHEIGHT,
-        16,42,610,420,window,reinterpret_cast<HMENU>(ID_LIST),nullptr,nullptr);
+        16,42,610,420,window,reinterpret_cast<HMENU>(static_cast<INT_PTR>(ID_LIST)),nullptr,nullptr);
       const struct{int id;const wchar_t* label;int y;} buttons[]={{ID_ADD,L"Add Logos",42},{ID_REMOVE,L"Remove",82},{ID_UP,L"Move Up",122},{ID_DOWN,L"Move Down",162},{ID_CLEAR,L"Clear All",202}};
-      for(const auto& b:buttons)CreateWindowExW(0,L"BUTTON",b.label,WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_PUSHBUTTON,642,b.y,140,32,window,reinterpret_cast<HMENU>(b.id),nullptr,nullptr);
-      CreateWindowExW(0,L"BUTTON",L"Cancel",WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_PUSHBUTTON,566,470,104,34,window,reinterpret_cast<HMENU>(ID_CANCEL),nullptr,nullptr);
-      CreateWindowExW(0,L"BUTTON",L"Apply Logos",WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_DEFPUSHBUTTON,678,470,104,34,window,reinterpret_cast<HMENU>(ID_APPLY),nullptr,nullptr);
+      for(const auto& b:buttons)CreateWindowExW(0,L"BUTTON",b.label,WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_PUSHBUTTON,642,b.y,140,32,window,reinterpret_cast<HMENU>(static_cast<INT_PTR>(b.id)),nullptr,nullptr);
+      CreateWindowExW(0,L"BUTTON",L"Cancel",WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_PUSHBUTTON,566,470,104,34,window,reinterpret_cast<HMENU>(static_cast<INT_PTR>(ID_CANCEL)),nullptr,nullptr);
+      CreateWindowExW(0,L"BUTTON",L"Apply Logos",WS_CHILD|WS_VISIBLE|WS_TABSTOP|BS_DEFPUSHBUTTON,678,470,104,34,window,reinterpret_cast<HMENU>(static_cast<INT_PTR>(ID_APPLY)),nullptr,nullptr);
       for(const auto& path:self->getLogoPaths()){std::wstring wide=utf8ToWide(path);SendMessageW(self->managerList_,LB_ADDSTRING,0,reinterpret_cast<LPARAM>(wide.c_str()));}
       return 0;
     }
@@ -347,8 +347,8 @@ FFResult BRRunningLogo::ProcessOpenGL(ProcessOpenGLStruct*){
   if(!visible_)return FF_SUCCESS;if(atlasDirty_.exchange(false))rebuildAtlas();
   auto now=std::chrono::steady_clock::now();double delta=std::chrono::duration<double>(now-lastFrame_).count();lastFrame_=now;if(!paused_)elapsed_+=std::min(delta,0.1);
   float offsetX=0,offsetY=0;
-  if(values_[P_ANIM_IN]>0.5f){float duration=.05f+values_[P_IN_DURATION]*4.95f;float progress=clamp01(float(elapsed_/duration));progress=progress*progress*(3-2*progress);float distance=values_[P_IN_AXIS]<.5f?float(viewportWidth_):float(viewportHeight_);float offset=(1-progress)*distance*(values_[P_IN_INVERT]>.5f?1:-1);if(values_[P_IN_AXIS]<.5f)offsetX=offset;else offsetY=offset;}
-  if(playingOut_&&values_[P_ANIM_OUT]>.5f){float duration=.05f+values_[P_OUT_DURATION]*4.95f;float progress=clamp01(float((elapsed_-outStartedAt_)/duration));progress=progress*progress*(3-2*progress);float distance=values_[P_OUT_AXIS]<.5f?float(viewportWidth_):float(viewportHeight_);float offset=progress*distance*(values_[P_OUT_INVERT]>.5f?-1:1);if(values_[P_OUT_AXIS]<.5f)offsetX=offset;else offsetY=offset;if(progress>=1.0f)visible_=false;}
+  if(values_[P_ANIM_IN]>0.5f){float duration=.05f+values_[P_IN_DURATION]*4.95f;float progress=brClamp01(float(elapsed_/duration));progress=progress*progress*(3-2*progress);float distance=values_[P_IN_AXIS]<.5f?float(viewportWidth_):float(viewportHeight_);float offset=(1-progress)*distance*(values_[P_IN_INVERT]>.5f?1:-1);if(values_[P_IN_AXIS]<.5f)offsetX=offset;else offsetY=offset;}
+  if(playingOut_&&values_[P_ANIM_OUT]>.5f){float duration=.05f+values_[P_OUT_DURATION]*4.95f;float progress=brClamp01(float((elapsed_-outStartedAt_)/duration));progress=progress*progress*(3-2*progress);float distance=values_[P_OUT_AXIS]<.5f?float(viewportWidth_):float(viewportHeight_);float offset=progress*distance*(values_[P_OUT_INVERT]>.5f?-1:1);if(values_[P_OUT_AXIS]<.5f)offsetX=offset;else offsetY=offset;if(progress>=1.0f)visible_=false;}
   float boxRgb[3],strokeRgb[3];HSVtoRGB(values_[P_BOX_H],values_[P_BOX_S],values_[P_BOX_B],boxRgb[0],boxRgb[1],boxRgb[2]);HSVtoRGB(values_[P_STROKE_H],values_[P_STROKE_S],values_[P_STROKE_B],strokeRgb[0],strokeRgb[1],strokeRgb[2]);
   float boxW=std::max(8.0f,values_[P_BOX_WIDTH]*viewportWidth_),boxH=std::max(8.0f,values_[P_BOX_HEIGHT]*viewportHeight_);
   ScopedShaderBinding binding(shader_.GetGLID());glActiveTexture(GL_TEXTURE0);glBindTexture(GL_TEXTURE_2D,atlasTexture_);auto u=[&](const char* name){return shader_.FindUniform(name);};
